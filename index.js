@@ -6,25 +6,27 @@ const parse = require('csv-parse/lib/sync'); //csv utilities
 const fs = require("fs");
 const generate = require('csv-generate')
 
+//CSV FILES NEED TO BE SEPARATED BY COMMAS
+
 //IMPORT DATA
 console.log("Loading file...")
-let fileName = "" //file name for the csv
-const input = fs.readFileSync("./current_dataset/" + fileName + ".csv").toString(); //read the input file
+let fileName = "" //file name for the output csv
+let inputName = "" //file name for the input csv to test, not for training
+const input = fs.readFileSync("./current_dataset/" + inputName + ".csv").toString(); //read the input file
 const records = parse(input, {
     columns: true,
     skip_empty_lines: true
 });
 
-//DEFINE INPUT/OUTPUT FIELDS
+//DEFINE INPUT FIELDS
 console.log("Loading data...")
 let inputFields = []
 let hiddenNodes = inputFields.length //set the number of hidden nodes
-let outputName = ""
-let targetArr = records.map(rec => rec[outputName]) //get the expected target values
 
 //CREATE VARIABLES
-let target = math.matrix()
+let target = math.matrix() //create an empty matrix to use for target in training
 let matInput = math.matrix() //create an empty matrix to use as input
+let matTrain = math.matrix() //create an empty matrix to use for training
 let mat //temporary matrix to use in the coming cycle
 let epoch = 5000 //number of cycles for the training
 let lr = .1 //learning rate
@@ -47,24 +49,57 @@ for (let i = 0; i < records.length; i++) {
     }
     if (i == 0) {
         matInput = mat
-        target = math.matrix([[parseFloat(targetArr[i])]])
     }
     else {
         matInput = math.concat(matInput, mat, 0)
-        target = math.concat(target, math.matrix([[parseFloat(targetArr[i])]]), 0)
     }
 }
 
 //CREATE NETWORK
-const nn = new NeuralNetwork(inputFields.length, hiddenNodes, output, epoch, lr, netName); //create the network
+const nn = new NeuralNetwork(inputFields.length, hiddenNodes, output, epoch, lr, netName);
+
+//LOAD OR CREATE TRAINING DATA
 if (previousTraining) {
     console.log("Loading training data...")
     const synapses = require("./connections/" + netName); //require previous training data
     nn.loadSynapses(synapses.syn0, synapses.syn1)
 }
 else {
+    let trainName = ""
+    const train = fs.readFileSync("./current_dataset/" + trainName + ".csv").toString(); //read the training file
+    const recordsTrain = parse(train, {
+        columns: true,
+        skip_empty_lines: true
+    });
+
+    //CREATE TARGET ARRAY
+    let outputName = "" //name of the output column in the csv
+    let targetArr = recordsTrain.map(rec => rec[outputName]) //get the expected target values
+
+    //CREATE THE TRAINING AND TARGET MATRIX
+    for (let i = 0; i < recordsTrain.length; i++) {
+        mat = math.matrix([[parseFloat(recordsTrain[i][inputFields[0]])]]);
+        if (inputFields.length > 1) {
+            for (let x = 1; x < inputFields.length; x++) {
+                if (inputFields[x] == undefined) {
+                    mat = math.concat(mat, math.matrix([[0]]));
+                }
+                else {
+                    mat = math.concat(mat, math.matrix([[parseFloat(recordsTrain[i][inputFields[x]])]]));
+                }
+            }
+        }
+        if (i == 0) {
+            matTrain = mat
+            target = math.matrix([[parseFloat(targetArr[i])]])
+        }
+        else {
+            matTrain = math.concat(matTrain, mat, 0)
+            target = math.concat(target, math.matrix([[parseFloat(targetArr[i])]]), 0)
+        }
+    }
     console.log("Training started...")
-    nn.train(matInput, target); //train the network
+    nn.train(matTrain, target); //train the network
 }
 console.log("Testing started...")
 let result = nn.predict(matInput); //test the network
