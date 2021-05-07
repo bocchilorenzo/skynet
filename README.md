@@ -1,7 +1,10 @@
-<div align="center">
-  <img src="https://miro.medium.com/max/3840/1*fSp3LOg8N8YN-eiIOFJ9pA.jpeg" width="100px">
-</div> 
+# Skynet
+JavaScript implementation of simple **multilayer perceptron (MLP)** with backpropagation learning algorithm.
 
-# skynet
-JavaScript implementation of simple **multilayer perceptron (MLP)**. 
+Currently the network has one hidden layer and one output.
 
+Features:
+- use data from an external csv file
+- save trained network to external file for future use
+- save results to external csv
+ 
