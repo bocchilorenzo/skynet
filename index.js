@@ -7,6 +7,7 @@ const fs = require("fs");
 const generate = require('csv-generate')
 
 //CSV FILES NEED TO BE SEPARATED BY COMMAS
+//for the input files, both the training csv and the test csv, create a folder named "current_dataset" and put the files there
 
 //IMPORT DATA
 console.log("Loading file...")
