@@ -4,7 +4,8 @@
  *  and put both the input files, one for testing and one for training(*)
  *  - fill the .env file with the wanted values
  * 
- * (*) the values need to be separated by commas
+ * (*) the values need to be separated by commas. It is recommended to put the expected output in the input file
+ *     and using the same column name for the target (OUTPUT_COLUMN_NAME) to get a better output
  * 
  * WHAT DO THE VALUES IN .ENV MEAN?
  *  - OUTPUT_CSV_NAME = file name for the output csv
@@ -131,7 +132,18 @@ fs.mkdir('./results/' + netName + "/", { recursive: true }, (err) => {
     if (err) throw err;
 })
 const writeStream = fs.createWriteStream('./results/' + netName + '/' + outName + ".csv");
-for (let i = 0; i < result._size[0]; i++) {
-    writeStream.write(math.flatten(result)._data[i] + '\n');
+let targetArr = []
+let outputName = process.env.OUTPUT_COLUMN_NAME
+try {
+    targetArr = records.map(rec => rec[outputName]);
+    writeStream.write("Expected,Received" + '\n');
+    for (let i = 0; i < result._size[0]; i++) {
+        writeStream.write(targetArr[i] + "," + math.flatten(result)._data[i] + '\n');
+    }
+} catch (err) {
+    console.log(err)
+    for (let i = 0; i < result._size[0]; i++) {
+        writeStream.write(math.flatten(result)._data[i] + '\n');
+    }
 }
 console.log("Testing completed! Check the results in the 'result' directory")
