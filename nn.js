@@ -1,6 +1,9 @@
 import { random, multiply, dotMultiply, mean, abs, subtract, transpose, add } from 'mathjs'
 import * as activation from './activations'
 const fs = require("fs");
+const d3nLine = require('d3node-linechart');
+const output = require('d3node-output');
+const d3 = require('d3-node')().d3;
 
 export class NeuralNetwork {
     constructor(...args) {
@@ -14,6 +17,7 @@ export class NeuralNetwork {
         this.output = 0;
 
         this.netName = args[5]
+        this.errorHistory = []
 
         this.synapse0 = random([this.input_nodes, this.hidden_nodes], -1.0, 1.0); //connections from input layer to hidden
         this.synapse1 = random([this.hidden_nodes, this.output_nodes], -1.0, 1.0); //connections from hidden layer to output
@@ -40,6 +44,8 @@ export class NeuralNetwork {
             this.synapse1 = add(this.synapse1, multiply(transpose(hidden_layer), multiply(output_delta, this.lr)));
             this.synapse0 = add(this.synapse0, multiply(transpose(input_layer), multiply(hidden_delta, this.lr)));
             this.output = output_layer;
+
+            this.errorHistory.push(mean(abs(output_error)))
             if (i % 10 == 0)
                 console.log(`Error: ${mean(abs(output_error))}` + ` Iteration: ${i}`);
         }
@@ -55,6 +61,17 @@ export class NeuralNetwork {
                 console.log("Training file saved!");
             }
         });
+
+        //CREATE ERROR HISTORY CHART
+        let directory = "./results/" + this.netName + "/"
+        fs.mkdir(directory, { recursive: true }, (err) => {
+            if (err) throw err;
+        });
+        let data = []
+        for (let i = 0; i < this.errorHistory.length; i++) {
+            data.push({ key: i, value: this.errorHistory[i] })
+        }
+        output(directory + this.netName + "_errorChart", d3nLine({ data: data }), { width: 960, height: 550 });
     }
     predict(input) {
         let input_layer = input;

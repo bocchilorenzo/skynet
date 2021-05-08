@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "csv": "^5.5.0",
+    "d3node-linechart": "^0.1.2",
+    "dotenv": "^9.0.0",
     "mathjs": "^9.3.2",
     "should": "^13.2.3"
   },
