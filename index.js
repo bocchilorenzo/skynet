@@ -124,9 +124,12 @@ console.log("Testing started...")
 let result = nn.predict(matInput); //test the network
 
 //SAVE RESULTS
-fs.mkdir('./results/' + netName + '/', { recursive: true }, (err) => {
+fs.mkdir('./results/', { recursive: true }, (err) => {
     if (err) throw err;
 });
+fs.mkdir('./results/' + netName + "/", { recursive: true }, (err) => {
+    if (err) throw err;
+})
 const writeStream = fs.createWriteStream('./results/' + netName + '/' + outName + ".csv");
 for (let i = 0; i < result._size[0]; i++) {
     writeStream.write(math.flatten(result)._data[i] + '\n');

@@ -63,15 +63,18 @@ export class NeuralNetwork {
         });
 
         //CREATE ERROR HISTORY CHART
-        let directory = "./results/" + this.netName + "/"
+        let directory = "./results/"
         fs.mkdir(directory, { recursive: true }, (err) => {
             if (err) throw err;
         });
+        fs.mkdir(directory + this.netName + "/", { recursive: true }, (err) => {
+            if (err) throw err;
+        })
         let data = []
         for (let i = 0; i < this.errorHistory.length; i++) {
             data.push({ key: i, value: this.errorHistory[i] })
         }
-        output(directory + this.netName + "_errorChart", d3nLine({ data: data }), { width: 960, height: 550 });
+        output(directory + this.netName + "/" + this.netName + "_errorChart", d3nLine({ data: data, container: `<div id="container"><h2>Error history chart for "${this.netName}" dataset</h2><p>Final error: ${this.errorHistory[this.epochs - 1]}, Iterations: ${this.epochs}</p><div id="chart"></div></div>` }), { width: 960, height: 550 });
     }
     predict(input) {
         let input_layer = input;
