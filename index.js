@@ -12,6 +12,7 @@
  *  - INPUT_NAME = file name for the input csv to test, not for training
  *  - EPOCH = number of cycles for the training
  *  - LEARNING_RATE = learning rate
+ *	- HIDDEN_NEURONS = number of hidden nodes
  *  - PREV_TRAINING = true if training was made and synapses data was saved, false otherwise
  *  - NETWORK_NAME = name of the network, used to save training data to be able to reuse the network with different data
  *  - TRAINING_NAME = name of the training file
@@ -41,7 +42,7 @@ const records = parse(input, {
 //DEFINE INPUT FIELDS
 console.log("Loading data...")
 let inputFields = process.env.INPUT_FIELDS.split(",")
-let hiddenNodes = inputFields.length //set the number of hidden nodes
+let hiddenNodes = parseInt(process.env.HIDDEN_NEURONS)
 
 //CREATE VARIABLES
 let target = math.matrix() //create an empty matrix to use for target in training
