@@ -17,7 +17,7 @@ export class NeuralNetwork {
         this.output = 0;
 
         this.netName = args[5]
-        this.errorHistory = []
+        this.loss = []
 
         this.synapse0 = random([this.input_nodes, this.hidden_nodes], -1.0, 1.0); //connections from input layer to hidden
         this.synapse1 = random([this.hidden_nodes, this.output_nodes], -1.0, 1.0); //connections from hidden layer to output
@@ -45,9 +45,9 @@ export class NeuralNetwork {
             this.synapse0 = add(this.synapse0, multiply(transpose(input_layer), multiply(hidden_delta, this.lr)));
             this.output = output_layer;
 
-            this.errorHistory.push(mean(abs(output_error)))
+            this.loss.push(mean(abs(output_error)))
             if (i % 10 == 0)
-                console.log(`Error: ${mean(abs(output_error))}` + ` Iteration: ${i}`);
+                console.log(`Loss: ${mean(abs(output_error))}` + ` Iteration: ${i}`);
         }
 
         //CREATE DIRECTORY AND SAVE TRAINING DATA
@@ -71,10 +71,10 @@ export class NeuralNetwork {
             if (err) throw err;
         })
         let data = []
-        for (let i = 0; i < this.errorHistory.length; i++) {
-            data.push({ key: i, value: this.errorHistory[i] })
+        for (let i = 0; i < this.loss.length; i++) {
+            data.push({ key: i, value: this.loss[i] })
         }
-        output(directory + this.netName + "/" + this.netName + "_errorChart", d3nLine({ data: data, container: `<div id="container"><h2>Error history chart for "${this.netName}" dataset</h2><p>Final error: ${this.errorHistory[this.epochs - 1]}, Iterations: ${this.epochs}</p><div id="chart"></div></div>` }), { width: 960, height: 550 });
+        output(directory + this.netName + "/" + this.netName + "_lossChart", d3nLine({ data: data, container: `<div id="container"><h2>Loss chart for "${this.netName}" dataset</h2><p><b>Final loss: ${this.loss[this.epochs - 1]}, Iterations: ${this.epochs}</b></p><div id="chart"></div></div>` }), { width: 960, height: 550 });
     }
     predict(input) {
         let input_layer = input;

@@ -137,9 +137,16 @@ let targetArr = []
 let outputName = process.env.OUTPUT_COLUMN_NAME
 try {
     targetArr = records.map(rec => rec[outputName]);
-    writeStream.write("Expected,Received" + '\n');
+    //writeStream.write("sep=," + '\n'); //enable to have a better reading experience in Excel
+    writeStream.write("Expected,Received,isCorrect" + '\n');
     for (let i = 0; i < result._size[0]; i++) {
-        writeStream.write(targetArr[i] + "," + math.flatten(result)._data[i] + '\n');
+        writeStream.write(targetArr[i] + "," + math.flatten(result)._data[i]);
+        if (parseFloat(targetArr[i]) == 1) {
+            parseFloat(targetArr[i]) - math.flatten(result)._data[i] < 0.5 ? writeStream.write(",1" + '\n') : writeStream.write(",0" + '\n')
+        }
+        else {
+            parseFloat(targetArr[i]) + math.flatten(result)._data[i] < 0.5 ? writeStream.write(",1" + '\n') : writeStream.write(",0" + '\n')
+        }
     }
 } catch (err) {
     console.log(err)
@@ -148,3 +155,48 @@ try {
     }
 }
 console.log("Testing completed! Check the results in the 'result' directory")
+
+/*
+//DATASET ANALYSIS
+const ds = fs.readFileSync("./current_dataset/dataset.csv").toString(); //read the input file
+const recordsDs = parse(ds, {
+    columns: true,
+    skip_empty_lines: true
+});
+let values = {}
+let fields = inputFields
+fields.push(process.env.OUTPUT_COLUMN_NAME)
+//exclude last value as it's the output
+for (let i = 1; i < fields.length - 1; i++) {
+    values[fields[i]] = 0
+}
+let desiredResult = "" //set the result to monitor
+for (let i = 0; i < recordsDs.length; i++) {
+    mat = math.matrix([[recordsDs[i][fields[0]]]]);
+    if (fields.length > 1) {
+        for (let x = 1; x < fields.length; x++) {
+            if (fields[x] == undefined) {
+                mat = math.concat(mat, math.matrix([[0]]));
+            }
+            else {
+                mat = math.concat(mat, math.matrix([[recordsDs[i][fields[x]]]]));
+            }
+        }
+    }
+    if (i == 0) {
+        matInput = mat
+    }
+    else {
+        matInput = math.concat(matInput, mat, 0)
+    }
+}
+for (let i = 0; i < matInput._size[0]; i++) {
+    //if the result for that line is that count the values
+    if (matInput._data[i][15] == desiredResult) {
+        for (let x = 0; x < matInput._data[i].length - 1; x++) {
+            values[fields[x]] += 1
+        }
+    }
+}
+console.log(values)
+*/
